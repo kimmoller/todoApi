@@ -7,11 +7,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"todoApi/auth"
 	"todoApi/database"
 	"todoApi/model"
 	"todoApi/testutils"
 
-	"github.com/go-playground/assert/v2"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -34,8 +35,8 @@ func TestIdentityCreate(t *testing.T) {
 	router := GetApi()
 
 	identity := model.Identity{
-		Username: "test",
-		Password: "test",
+		Username: "newTestIdentity",
+		Password: "newPassword",
 	}
 	jsonValue, _ := json.Marshal(identity)
 	req, err := http.NewRequest("POST", "/identity", bytes.NewBuffer(jsonValue))
@@ -46,4 +47,10 @@ func TestIdentityCreate(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, http.StatusCreated, w.Code)
+
+	dbIdentity, err := database.Instance.GetIdentity(context.Background(), "newTestIdentity")
+	require.NoError(t, err)
+
+	assert.NotEqual(t, identity.Password, dbIdentity.Password)
+	assert.True(t, auth.CheckPasswordHash(identity.Password, dbIdentity.Password))
 }

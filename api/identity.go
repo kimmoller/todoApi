@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"todoApi/auth"
 	"todoApi/database"
 	"todoApi/model"
 
@@ -18,7 +19,19 @@ func createIdentity(ctx *gin.Context) {
 		return
 	}
 
-	err := database.Instance.InsertIdentity(ctx, identity)
+	if !auth.ValidatePassword(identity.Password) {
+		ctx.IndentedJSON(http.StatusBadRequest, "Password is too long")
+		return
+	}
+
+	hash, err := auth.HashPassword(identity.Password)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	identity.Password = hash
+	err = database.Instance.InsertIdentity(ctx, identity)
 	if err != nil {
 		log.Print(err)
 		return
