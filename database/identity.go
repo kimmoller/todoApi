@@ -36,3 +36,30 @@ func (pg *Postgres) GetIdentity(ctx context.Context, username string) (*model.Id
 	}
 	return &identity, nil
 }
+
+func (pg *Postgres) UpdateIdentityPassword(ctx context.Context, id string, password string) error {
+	query := "UPDATE identity SET password=@password WHERE id=@id"
+	args := pgx.NamedArgs{
+		"password": password,
+		"id":       id,
+	}
+
+	_, err := pg.db.Exec(ctx, query, args)
+	if err != nil {
+		return fmt.Errorf("error while updating user %s password, %w", id, err)
+	}
+	return nil
+}
+
+func (pg *Postgres) DeleteIdentity(ctx context.Context, id string) error {
+	query := "DELETE FROM identity WHERE id=@id"
+	args := pgx.NamedArgs{
+		"id": id,
+	}
+
+	_, err := pg.db.Exec(ctx, query, args)
+	if err != nil {
+		return fmt.Errorf("error while deleting user %s, %w", id, err)
+	}
+	return nil
+}

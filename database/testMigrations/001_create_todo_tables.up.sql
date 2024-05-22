@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS todo (
     id SERIAL PRIMARY KEY,
     task VARCHAR(255) NOT NULL,
     status VARCHAR(255) NOT NULL,
-    identityId INT REFERENCES identity(id)
+    identityId INT REFERENCES identity(id) ON DELETE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS todo_id_identity_id ON todo(id, identityId);
@@ -33,3 +33,8 @@ INSERT INTO todo(task, status, identityId) VALUES('todoToUpdate', 'ONGOING',
 
 INSERT INTO todo(task, status, identityId) VALUES('todoToDelete', 'ONGOING',
  (SELECT id FROM identity WHERE username='todoDelete'));
+
+INSERT INTO todo(task, status, identityId) VALUES('firstTodo', 'ONGOING',
+ (SELECT id FROM identity WHERE username='identityToDelete'));
+INSERT INTO todo(task, status, identityId) VALUES('secondTodo', 'ONGOING',
+ (SELECT id FROM identity WHERE username='identityToDelete'));
