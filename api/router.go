@@ -8,7 +8,7 @@ func GetApi() *gin.Engine {
 
 	router.POST("/identity", createIdentity)
 
-	router.GET("/todo/identity/:userId", getTodos)
+	router.GET("/todo/identity/:identityId", getTodos)
 	router.POST("/todo", createTodo)
 	router.PATCH("/todo/:id", updateTodo)
 	router.DELETE("/todo/:id", deleteTodo)

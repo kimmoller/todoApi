@@ -10,9 +10,15 @@ import (
 )
 
 func getTodos(ctx *gin.Context) {
-	userId := ctx.Param("userId")
+	err := authorizeRequest(ctx)
+	if err != nil {
+		ctx.IndentedJSON(http.StatusUnauthorized, err)
+		return
+	}
 
-	todos, err := database.Instance.FetchTodos(ctx, userId)
+	identityId := ctx.Param("identityId")
+
+	todos, err := database.Instance.FetchTodos(ctx, identityId)
 	if err != nil {
 		log.Println(err)
 		return
@@ -22,6 +28,12 @@ func getTodos(ctx *gin.Context) {
 }
 
 func createTodo(ctx *gin.Context) {
+	err := authorizeRequest(ctx)
+	if err != nil {
+		ctx.IndentedJSON(http.StatusUnauthorized, err)
+		return
+	}
+
 	var newTodo model.Todo
 
 	if err := ctx.BindJSON(&newTodo); err != nil {
@@ -29,7 +41,7 @@ func createTodo(ctx *gin.Context) {
 		return
 	}
 
-	err := database.Instance.InsertTodo(ctx, newTodo)
+	err = database.Instance.InsertTodo(ctx, newTodo)
 	if err != nil {
 		log.Println(err)
 		return
@@ -39,6 +51,12 @@ func createTodo(ctx *gin.Context) {
 }
 
 func updateTodo(ctx *gin.Context) {
+	err := authorizeRequest(ctx)
+	if err != nil {
+		ctx.IndentedJSON(http.StatusUnauthorized, err)
+		return
+	}
+
 	id := ctx.Param("id")
 	var status string
 
@@ -47,7 +65,7 @@ func updateTodo(ctx *gin.Context) {
 		return
 	}
 
-	err := database.Instance.UpdateTodo(ctx, id, status)
+	err = database.Instance.UpdateTodo(ctx, id, status)
 	if err != nil {
 		log.Println(err)
 		return
@@ -57,9 +75,15 @@ func updateTodo(ctx *gin.Context) {
 }
 
 func deleteTodo(ctx *gin.Context) {
+	err := authorizeRequest(ctx)
+	if err != nil {
+		ctx.IndentedJSON(http.StatusUnauthorized, err)
+		return
+	}
+
 	todoId := ctx.Param("id")
 
-	err := database.Instance.DeleteTodo(ctx, todoId)
+	err = database.Instance.DeleteTodo(ctx, todoId)
 	if err != nil {
 		log.Println(err)
 		return

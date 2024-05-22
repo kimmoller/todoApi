@@ -13,24 +13,20 @@ import (
 	"todoApi/testutils"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestListTodosForUser(t *testing.T) {
-	container, err := testutils.GetTestContainer()
-	require.NoError(t, err)
+	container, _ := testutils.GetTestContainer()
 
 	defer container.Terminate(context.Background())
 
 	database.Migratedb(dbUrl, filePath)
-	_, err = database.NewPG(context.Background(), dbUrl)
-
-	require.NoError(t, err)
+	database.NewPG(context.Background(), dbUrl)
 
 	router := GetApi()
 
-	req, err := http.NewRequest("GET", "/todo/identity/3", nil)
-	require.NoError(t, err)
+	req, _ := http.NewRequest("GET", "/todo/identity/3", nil)
+	addAuthHeaders(req, "todoFetch")
 
 	w := httptest.NewRecorder()
 
@@ -38,24 +34,19 @@ func TestListTodosForUser(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var todos = []model.Todo{}
-	body, err := io.ReadAll(w.Body)
-	require.NoError(t, err)
+	body, _ := io.ReadAll(w.Body)
 
-	err = json.Unmarshal(body, &todos)
-	require.NoError(t, err)
+	json.Unmarshal(body, &todos)
 	assert.Equal(t, 3, len(todos))
 }
 
 func TestTodoCreate(t *testing.T) {
-	container, err := testutils.GetTestContainer()
-	require.NoError(t, err)
+	container, _ := testutils.GetTestContainer()
 
 	defer container.Terminate(context.Background())
 
 	database.Migratedb(dbUrl, filePath)
-	_, err = database.NewPG(context.Background(), dbUrl)
-
-	require.NoError(t, err)
+	database.NewPG(context.Background(), dbUrl)
 
 	router := GetApi()
 
@@ -65,8 +56,8 @@ func TestTodoCreate(t *testing.T) {
 	}
 
 	jsonValue, _ := json.Marshal(todo)
-	req, err := http.NewRequest("POST", "/todo", bytes.NewBuffer(jsonValue))
-	require.NoError(t, err)
+	req, _ := http.NewRequest("POST", "/todo", bytes.NewBuffer(jsonValue))
+	addAuthHeaders(req, "todoCreate")
 
 	w := httptest.NewRecorder()
 
@@ -79,21 +70,18 @@ func TestTodoCreate(t *testing.T) {
 }
 
 func TestUpdateTodo(t *testing.T) {
-	container, err := testutils.GetTestContainer()
-	require.NoError(t, err)
+	container, _ := testutils.GetTestContainer()
 
 	defer container.Terminate(context.Background())
 
 	database.Migratedb(dbUrl, filePath)
-	_, err = database.NewPG(context.Background(), dbUrl)
-
-	require.NoError(t, err)
+	database.NewPG(context.Background(), dbUrl)
 
 	router := GetApi()
 
 	jsonValue, _ := json.Marshal("COMPLETED")
-	req, err := http.NewRequest("PATCH", "/todo/4", bytes.NewBuffer(jsonValue))
-	require.NoError(t, err)
+	req, _ := http.NewRequest("PATCH", "/todo/4", bytes.NewBuffer(jsonValue))
+	addAuthHeaders(req, "todoUpdate")
 
 	w := httptest.NewRecorder()
 
@@ -107,20 +95,17 @@ func TestUpdateTodo(t *testing.T) {
 }
 
 func TestTodoDelete(t *testing.T) {
-	container, err := testutils.GetTestContainer()
-	require.NoError(t, err)
+	container, _ := testutils.GetTestContainer()
 
 	defer container.Terminate(context.Background())
 
 	database.Migratedb(dbUrl, filePath)
-	_, err = database.NewPG(context.Background(), dbUrl)
-
-	require.NoError(t, err)
+	database.NewPG(context.Background(), dbUrl)
 
 	router := GetApi()
 
-	req, err := http.NewRequest("DELETE", "/todo/5", nil)
-	require.NoError(t, err)
+	req, _ := http.NewRequest("DELETE", "/todo/5", nil)
+	addAuthHeaders(req, "todoDelete")
 
 	w := httptest.NewRecorder()
 

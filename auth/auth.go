@@ -2,7 +2,10 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"log"
+	"strings"
 	"time"
 	"todoApi/database"
 
@@ -44,4 +47,37 @@ func ValidateToken(token string) (*ValidToken, error) {
 		return nil, fmt.Errorf("invalid token")
 	}
 	return &ValidToken{*jwtToken, claims}, nil
+}
+
+func ValidateRequest(ctx context.Context, username string, authHeader string) error {
+	errorString := "invalid request"
+	if authHeader == "" {
+		return errors.New(errorString)
+	}
+	authParts := strings.Split(authHeader, " ")
+	log.Println(authParts)
+	if len(authParts) != 2 {
+		return errors.New(errorString)
+	}
+	token := authParts[1]
+
+	validToken, err := ValidateToken(token)
+	if err != nil {
+		return errors.New(errorString)
+	}
+
+	identity, err := database.Instance.GetIdentity(ctx, username)
+	if err != nil {
+		return errors.New(errorString)
+	}
+
+	subject, err := validToken.Claims.GetSubject()
+	if err != nil {
+		return errors.New(errorString)
+	}
+
+	if identity.Username != subject {
+		return errors.New(errorString)
+	}
+	return nil
 }
