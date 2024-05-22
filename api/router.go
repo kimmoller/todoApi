@@ -6,6 +6,8 @@ func GetApi() *gin.Engine {
 
 	router := gin.Default()
 
+	router.POST("/auth", login)
+
 	router.POST("/identity", createIdentity)
 
 	router.GET("/todo/identity/:identityId", getTodos)
